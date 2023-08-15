@@ -21,7 +21,7 @@ while IFS=: read -r device_name ip_address; do
     ./pbbTool.py extract --pbbFile=${backup_filename} --patternName=* --outputDir="${pixelblaze_dir}/epe"
 
     # Extract .js files from .epe
-    ./extract_src.py "${pixelblaze_dir}"
+    python3 ./extract_src.py "${pixelblaze_dir}"
 
 done < <(./pbbTool.py list-pixelblazes)
 
