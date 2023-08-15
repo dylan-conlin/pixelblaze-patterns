@@ -7,14 +7,14 @@ while IFS=: read -r device_name ip_address; do
     ip_address=$(echo $ip_address | xargs)
 
     backup_filename="backups/${device_name}.pbb"
-    pbbTool backup --ipAddress=${ip_address} --pbbFile=${backup_filename}
-done < <(pbbTool list-pixelblazes)
+    ./pbbTool.py backup --ipAddress=${ip_address} --pbbFile=${backup_filename}
+done < <(./pbbTool.py list-pixelblazes)
 
 # Clear the epe directory and extract new .epe files
 rm -rf epe
 mkdir -p epe
 for pbb_file in backups/*.pbb; do
-    pbbTool extract --pbbFile=${pbb_file} --patternName=* --outputDir=epe
+    ./pbbTool.py extract --pbbFile=${pbb_file} --patternName=* --outputDir=epe
 done
 
 # Clear the src directory and use extract_src.py to extract .js files
