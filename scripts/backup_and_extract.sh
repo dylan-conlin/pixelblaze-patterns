@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Ensure the backups directory exists
+mkdir -p backups
+
 # Backup all Pixelblazes
 while IFS=: read -r device_name ip_address; do
     # Trim whitespace
@@ -17,8 +20,8 @@ for pbb_file in backups/*.pbb; do
     ./pbbTool.py extract --pbbFile=${pbb_file} --patternName=* --outputDir=epe
 done
 
-# Clear the src directory and use extract_src.py to extract .js files
-rm -rf src
+# Clear the src directory completely and use extract_src.py to extract .js files
+rm -rf src/*
 mkdir -p src
 python3 extract_src.py
 
