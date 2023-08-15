@@ -16,4 +16,5 @@ for epe_filename in fnmatch.filter(os.listdir(indir), "*.epe"):
         program = json.load(epe)
         src_filename = re.sub(".epe$", "", epe_filename) + ".js"
         with io.open(os.path.join(outdir, src_filename), 'w') as sourcecode:
+            print(f"Writing to: {src_filename}")  # Add this line
             sourcecode.write(program['sources']['main'])
