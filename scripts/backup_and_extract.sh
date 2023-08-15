@@ -17,33 +17,12 @@ while IFS=: read -r device_name ip_address; do
     backup_filename="${pixelblaze_dir}/${device_name}.pbb"
     ./pbbTool.py backup --ipAddress=${ip_address} --pbbFile=${backup_filename}
 
-  # Extract .epe files
+    # Extract .epe files
     ./pbbTool.py extract --pbbFile=${backup_filename} --patternName=* --outputDir="${pixelblaze_dir}/epe"
 
-    # Copy epe files to the epe directory for extraction
-    cp "${pixelblaze_dir}/epe"/* epe/
-
-    # Debug: Print out the epe directory and its contents
-    echo "Contents of epe/ directory:"
-    ls -l epe/
-
     # Extract .js files from .epe
-    python3 ./extract_src.py
+    ./extract_src.py "${pixelblaze_dir}"
 
-    # Debug: Print out the src directory and its contents
-    echo "Contents of src/ directory:"
-    ls -l src/
-
-    # Move extracted .js files to the Pixelblaze directory
-    if [ "$(ls -A src/)" ]; then
-       mv src/* "${pixelblaze_dir}/src/"
-    else
-       echo "No files found in src/ to move."
-    fi
-
-    # Debug: Print out the contents of the Pixelblaze src directory
-    echo "Contents of ${pixelblaze_dir}/src/ directory:"
-    ls -l "${pixelblaze_dir}/src/"
 done < <(./pbbTool.py list-pixelblazes)
 
 
