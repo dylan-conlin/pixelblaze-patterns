@@ -87,6 +87,11 @@ def pbbTool():
                 else:
                     pbp.toEPE().toFile(pathlib.Path(pbbFile).with_name(pbp.name).with_suffix('.epe'))
 
+    def listPixelblazes(args):
+        for ipAddress in Pixelblaze.EnumerateAddresses(timeout=1500):
+            with Pixelblaze(ipAddress) as pb:
+                deviceName = pb.getDeviceName()
+                print(f"{deviceName}: {ipAddress}")
 # ------------------------------------------------
 
     # Create the top-level parser.
@@ -127,9 +132,11 @@ def pbbTool():
     parserExtract.add_argument("--verbose", action='store_true', help="Display debugging output")
     parserExtract.set_defaults(func=extractFromPBB)
 
+    parserListPixelblazes = subparsers.add_parser('list-pixelblazes', help='List all Pixelblazes on the network')
+    parserListPixelblazes.set_defaults(func=listPixelblazes)
+
     # Parse the command line.
     args = parser.parse_args()
-
     if args.command in ['backup']:
         # Enumerate the available Pixelblazes on the network and see which ones match.
         for ipAddress in Pixelblaze.EnumerateAddresses(timeout=1500):
@@ -139,6 +146,9 @@ def pbbTool():
                     fileName = pathlib.Path(args.pbbFile.replace('*', pixelblaze.getDeviceName())).with_suffix('.pbb')
                     # Call the appropriate routine to backup.
                     args.func(pixelblaze.ipAddress, fileName)
+
+    elif args.command == 'list-pixelblazes':
+        listPixelblazes(args)
 
     elif args.command in ['restore', 'clone']:
         # No wildcarding here; because of the potential data loss everything must be specified explicitly.
