@@ -23,7 +23,7 @@ done
 # Clear the src directory completely and use extract_src.py to extract .js files
 rm -rf src/*
 mkdir -p src
-python3 extract_src.py
+python3 ./extract_src.py
 
 # Commit changes to Git
 git add -A
