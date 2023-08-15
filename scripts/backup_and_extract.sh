@@ -17,7 +17,7 @@ while IFS=: read -r device_name ip_address; do
     backup_filename="${pixelblaze_dir}/${device_name}.pbb"
     ./pbbTool.py backup --ipAddress=${ip_address} --pbbFile=${backup_filename}
 
-    # Extract .epe files
+  # Extract .epe files
     ./pbbTool.py extract --pbbFile=${backup_filename} --patternName=* --outputDir="${pixelblaze_dir}/epe"
 
     # Copy epe files to the epe directory for extraction
@@ -28,7 +28,7 @@ while IFS=: read -r device_name ip_address; do
     ls -l epe/
 
     # Extract .js files from .epe
-    ./extract_src.py
+    python3 ./extract_src.py
 
     # Debug: Print out the src directory and its contents
     echo "Contents of src/ directory:"
@@ -45,6 +45,7 @@ while IFS=: read -r device_name ip_address; do
     echo "Contents of ${pixelblaze_dir}/src/ directory:"
     ls -l "${pixelblaze_dir}/src/"
 done < <(./pbbTool.py list-pixelblazes)
+
 
 # Commit changes to Git
 git add -A
