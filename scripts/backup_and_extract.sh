@@ -28,7 +28,7 @@ while IFS=: read -r device_name ip_address; do
     ls -l epe/
 
     # Extract .js files from .epe
-    python3 ./extract_src.py
+    ./extract_src.py
 
     # Debug: Print out the src directory and its contents
     echo "Contents of src/ directory:"
