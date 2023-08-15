@@ -7,14 +7,8 @@ if len(sys.argv) < 2:
 
 pixelblaze_name = sys.argv[1]
 
-script_dir = os.path.dirname(__file__)
-# Adjust the indir to point to the location of the epe files
-indir = os.path.join(script_dir, "backups", pixelblaze_name, "epe")
-print(indir)
-
-# Adjust the outdir to point to the desired location for the .js files
-outdir = os.path.join(script_dir, "backups", pixelblaze_name, "src")
-print(outdir)
+indir = sys.argv[1]
+outdir = sys.argv[2]
 
 for epe_filename in fnmatch.filter(os.listdir(indir), "*.epe"):
     print("Extracting source from " + epe_filename)
