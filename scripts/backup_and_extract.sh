@@ -9,21 +9,26 @@ while IFS=: read -r device_name ip_address; do
     device_name=$(echo $device_name | xargs)
     ip_address=$(echo $ip_address | xargs)
 
-    backup_filename="backups/${device_name}.pbb"
+    # Create a directory for each Pixelblaze
+    pixelblaze_dir="backups/${device_name}"
+    mkdir -p "${pixelblaze_dir}/epe"
+    mkdir -p "${pixelblaze_dir}/src"
+
+    backup_filename="${pixelblaze_dir}/${device_name}.pbb"
     ./pbbTool.py backup --ipAddress=${ip_address} --pbbFile=${backup_filename}
+
+    # Extract .epe files
+    ./pbbTool.py extract --pbbFile=${backup_filename} --patternName=* --outputDir="${pixelblaze_dir}/epe"
+
+    # Copy epe files to the epe directory for extraction
+    cp "${pixelblaze_dir}/epe"/* epe/
+
+    # Extract .js files from .epe
+    python3 extract_src.py
+
+    # Move extracted .js files to the Pixelblaze directory
+    mv src/* "${pixelblaze_dir}/src/"
 done < <(./pbbTool.py list-pixelblazes)
-
-# Clear the epe directory and extract new .epe files
-rm -rf epe
-mkdir -p epe
-for pbb_file in backups/*.pbb; do
-    ./pbbTool.py extract --pbbFile=${pbb_file} --patternName=* --outputDir=epe
-done
-
-# Clear the src directory completely and use extract_src.py to extract .js files
-rm -rf src/*
-mkdir -p src
-python3 ./extract_src.py
 
 # Commit changes to Git
 git add -A
