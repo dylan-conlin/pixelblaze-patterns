@@ -101,10 +101,8 @@ export function beforeRender(delta) {
   }
 }
 
-physicalToFibonacci = [ 0, 13, 26, 39, 52, 57, 44, 31, 18, 5, 10, 23, 36, 49, 62, 54, 41, 28, 15, 2, 7, 20, 33, 46, 59, 51, 38, 25, 12, 4, 17, 30, 43, 56, 61, 48, 35, 22, 9, 1, 14, 27, 40, 53, 58, 45, 32, 19, 6, 11, 24, 37, 50, 63, 55, 42, 29, 16, 3, 8, 21, 34, 47, 60 ];
-
 export function render(index) {
-  v = pixels[physicalToFibonacci[index]]
+  v = pixels[index]
 
   /*
     v * v is our typical gamma correction, and it's constrained to remain

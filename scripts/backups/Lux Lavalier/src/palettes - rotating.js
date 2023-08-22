@@ -9,14 +9,13 @@ translate3D(-.5, -.5, -.5)
 export function render2D(index, x, y) {
   t = time(0.04);
   // x = t + physicalToFibonacci[(pixelCount - 1) - index] / pixelCount;
-  bri = triangle(t + physicalToFibonacci[(pixelCount - 1) - index] / pixelCount)
+  bri = triangle(t + index / pixelCount)
 
   p = (PI + atan2(y, x)) / PI2 + t
   paletteIndex = time(secondsPerPalette) * palettes.length;
   fastLedPaletteAt(p, palettes[paletteIndex], bri*bri);
 }
 
-var physicalToFibonacci = [ 0, 13, 26, 39, 52, 57, 44, 31, 18, 5, 10, 23, 36, 49, 62, 54, 41, 28, 15, 2, 7, 20, 33, 46, 59, 51, 38, 25, 12, 4, 17, 30, 43, 56, 61, 48, 35, 22, 9, 1, 14, 27, 40, 53, 58, 45, 32, 19, 6, 11, 24, 37, 50, 63, 55, 42, 29, 16, 3, 8, 21, 34, 47, 60 ];
 
 function LERP(percent, low, high) {
   return low + percent * (high - low);

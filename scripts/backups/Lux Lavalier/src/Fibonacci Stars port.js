@@ -81,7 +81,7 @@ function updateFibonacciStars() {
 
 function drawFibonacciStars() {
   stars.forEach((star) => {
-    var index = fibonacciToPhysical[star[0]];
+    var index = star[0]
     // draw the star
     leds[index] = 1
     hues[index] = star[0] + gHue

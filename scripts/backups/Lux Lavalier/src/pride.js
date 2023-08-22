@@ -79,7 +79,7 @@ function pride(deltams, useFibonacciOrder) {
 }
 
 export function beforeRender(delta) {
-  pride(delta, 1)
+  pride(delta, 0)
 }
 
 export function render(index) {
