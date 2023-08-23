@@ -57,13 +57,6 @@ var palettes = [
 // rainbowsherbet,
 // heatmap_gp,
 
-var currentPalette = random(palettes.length);
-setPalette(palettes[currentPalette]);
-
-export function showNumberPaletteMode() {
-  return currentPalette + 1;
-}
-
 //variants of noise can be chosen from
 modes = [
   (x,y,z) => (perlin(x, y, z, 0) + 1)/2, //by default perlin returns negative values too, scale this to 0-1
@@ -71,10 +64,23 @@ modes = [
   (x,y,z) => (perlinFbm(x, y, z, 2, .5, 3)+1)/2, //this can also generate negative values
   (x,y,z) => perlinTurbulence(x, y, z, 2, .5, 3),
 ]
+
 export var mode = 1
 export var fireScale = 3
 export var risingSpeed = 1
 export var morphSpeed = 1
+export var currentPalette = 0
+
+setPalette(palettes[currentPalette]);
+
+export function sliderPalette(v) {
+  currentPalette = round(v*(palettes.length - 1))
+  setPalette(palettes[currentPalette]);
+}
+
+export function showNumberPaletteMode() {
+  return currentPalette + 1;
+}
 
 export function sliderMode(v) {
   mode = round(v*(modes.length - 1))
@@ -132,4 +138,12 @@ export function render2D(index, x, y) {
   //keep palette from wrapping if noise goes past 1.0
   v = min(v,1) 
   paint(v, v)
+}
+
+// You can also project up a dimension. Think of this as mixing in the z value
+// to x and y in order to compose a stack of matrices.
+export function render3D(index, x, y, z) {
+  x1 = (x - cos(z / 4 * PI2)) / 2
+  y1 = (y - sin(z / 4 * PI2)) / 2
+  render2D(index, x1, y1)
 }

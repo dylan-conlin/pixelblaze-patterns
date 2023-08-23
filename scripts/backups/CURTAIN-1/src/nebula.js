@@ -36,3 +36,11 @@ export function render2D(index, x, y) {
 
   hsv(hue, 1, value);
 }
+
+// You can also project up a dimension. Think of this as mixing in the z value
+// to x and y in order to compose a stack of matrices.
+export function render3D(index, x, y, z) {
+  x1 = (x - cos(z / 4 * PI2)) / 2
+  y1 = (y - sin(z / 4 * PI2)) / 2
+  render2D(index, x1, y1)
+}

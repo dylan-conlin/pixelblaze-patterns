@@ -48,6 +48,30 @@ function smoothstep(l,h,v) {
     var t = clamp((v - l) / (h - l), 0.0, 1.0);
     return t * t * (3.0 - 2.0 * t);
 }
+var fire = [
+  0,    0, 0, 0,
+  0.2,  1, 0, 0,
+  0.8,  1, 1, 0,
+  1,    1, 1, 1
+]
+var sunset = [0.0, 0.471, 0.0, 0.0,    0.086, 0.702, 0.086, 0.0,   0.2, 1.0, 0.408, 0.0,   0.333, 0.655, 0.086, 0.071,   0.529, 0.392, 0.0, 0.404,   0.776, 0.063, 0.0, 0.51,    1.0, 0.0, 0.0, 0.627,];
+
+// List of palettes
+var palettes = [fire, sunset];
+var currentPalette = 0; // Default palette
+
+setPalette(palettes[currentPalette])
+
+// Rest of the code...
+
+export function sliderPaletteMode(v) {
+  currentPalette = round(v*(palettes.length - 1));
+  setPalette(palettes[currentPalette]);
+}
+
+export function showNumberPaletteMode() {
+  return currentPalette + 1;
+}
 
 export function beforeRender(delta) {
   timebase = (timebase + delta/1000) % 1000;
@@ -65,12 +89,13 @@ export var pr;
 export function render2D(index,x,y) {
   var nx,ny,nz;
 
-// early out for pixels outside our radius
+  // early out for pixels outside our radius
   pr = poolRadius - hypot(x,y);
   if (pr < 0) {
     rgb(0,0,0);
     return;
   }
+  
   
   nx = ny = 0;
 
@@ -92,7 +117,13 @@ export function render2D(index,x,y) {
   nx /= tmp; ny /= tmp; nz = 1/tmp;
   s = clamp(nx * -0.1826 + ny * 0.3651 + nz * 0.90218,0,1);
 
-  // pick a blue/green gradient color based on "height", and draw the
-  // region that's inside our radius.
-  hsv(color,1.9-s,smoothstep(0,1,pr/poolRadius)*s*s*s*s);
+  // Compute a palette index based on brightness or some other suitable metric
+  var paletteIndex = smoothstep(0,1,pr/poolRadius)*s*s*s*s;
+  
+  // Use the computed palette index as the hue, which will be mapped to the current palette color
+  hsv(paletteIndex, 1.9-s, 1);
+  
+  // Use the current palette by setting the hue to a value between 0 and 1.
+  // Pixelblaze will map this hue value to the current palette color.
+  //hsv(color % 1, 1.9-s, smoothstep(0,1,pr/poolRadius)*s*s*s*s);
 }
