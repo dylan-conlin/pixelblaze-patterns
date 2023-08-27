@@ -2,7 +2,6 @@
 // requires Pixelblaze 3 w/3.30 or higher firmware
 //
 // 11/2022 ZRanger1
-
 export function beforeRender(delta) {
   t1 = time(0.04);
   c1 = wave(t1);
@@ -13,11 +12,6 @@ export function beforeRender(delta) {
   c2 = wave(t2)
   c3 = wave(-0.25-t2)
 }
-
-
-
-
-
 
 export function render2D(index,x,y) {
   d = bezierCubic(x,c1,c2,c3,c4);

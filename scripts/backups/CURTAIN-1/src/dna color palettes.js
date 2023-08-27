@@ -1,53 +1,15 @@
-// Common Variables
+export var t
+export var secondsPerPalette = 10;
+export var shimmer = true;
+export var transition = 0.16;
 var paletteIndex;
-var secondsPerPalette = 5;
-export var moveSpeed = .04;
-export var transition = 0.2;
-var shimmer = false;
-
-var sPseudotime = 0;
-var sHue16 = 0;
-var ledarray = array(pixelCount * 3);
-
-// Sliders and Inputs
-export function sliderPalette(v) {
-  paletteIndex = floor(v * (palettes.length - 1));
-}
-
-export function inputNumberSecondsPerPalette(v) {
-  secondsPerPalette = v;
-}
-
-/**
- * Maps a slider value to a specific range based on the given parameters.
- *
- * @param {number} v - The value from the slider, between 0 and 1.
- * @param {number} minValue - The minimum value that the variable can take.
- * @param {number} maxValue - The maximum value that the variable can take.
- * @param {boolean} isFloored - Whether the value should be rounded down to the nearest integer.
- * @param {boolean} isReversed - Whether the slider should operate in reversed mode.
- * 
- * @returns {number} - A scaled, optionally floored, and optionally reversed value.
- */
-var rangeSlider = function(v, minValue, maxValue, isFloored, isReversed) {
-  var valueRange = maxValue - minValue;
-  var scaledValue = minValue + (v * valueRange);
-
-  if (isReversed) {
-    scaledValue = maxValue - (v * valueRange);
-  }
-
-  if (isFloored) {
-    scaledValue = floor(scaledValue);
-  }
-
-  return scaledValue;
-};
-
-export function sliderMoveSpeed(v) {
-  moveSpeed = rangeSlider(v, 0.1, 5.0, false, false)
-  
-}
+export var speed = 4.72
+export var strandWidth = 0.57
+export var freq = 0.1
+export var myMode = 1
+export var distance = 1
+export var frequencyModifier = 0.1
+export var count = 0
 
 export function sliderTransitionTime(v) {
   transition = v;
@@ -56,67 +18,56 @@ export function sliderTransitionTime(v) {
 export function toggleShimmer(v) {
   shimmer = v;
 }
-
+export function inputNumberSecondsPerPalette(v) {
+  secondsPerPalette = v;
+}
 export function showNumberPalette() {
   return paletteIndex;
 }
-
-// Utility functions like beatsin8, beatsin88
-function beatsin8(bpm, low, high) {
-  return wave(time(0.91552734375 / bpm)) * (high - low) + low;
+export function sliderSpeed(v) {
+  speed = 3 + ((1-v) * 10)
 }
 
-function beatsin88(bpm, low, high) {
-  return beatsin8(bpm >> 8, low, high);
-}
-
-// Main Pattern Function
-function colorwaves(deltams) {
-  // Scale the time delta with moveSpeed
-  deltams *= moveSpeed;
-
-  var brightdepth = beatsin88(171, 96, 224);
-  var brightnessthetainc16 = beatsin88(102, (25 * 256), (40 * 256));
-  var msmultiplier = beatsin88(74, 23, 60);
-
-  var hue16 = sHue16;
-  var hueinc16 = beatsin88(57, 1, 128 * 3);
-
-  // Incorporate moveSpeed into the pseudotime and hue calculations
-  sPseudotime += (deltams * msmultiplier) >> 16;
-  sHue16 += deltams * beatsin88(200, 5, 9);
-  var brightnesstheta16 = sPseudotime;
-
-  for (var i = 0; i < pixelCount; i++) {
-    hue16 += hueinc16;
-    var hue8 = triangle(hue16 >> 16) * 128;
-
-    brightnesstheta16 += brightnessthetainc16 >> 16;
-    brightnesstheta16 = mod(brightnesstheta16 + (brightnessthetainc16 >> 16), 1);
-    var b16 = wave(brightnesstheta16);
-
-    var bri16 = b16 * b16;
-    var bri8 = bri16 * (brightdepth >> 8);
-    bri8 += (1 - (brightdepth >> 8));
-
-    var index = hue8;
-    index = index / 256 * 240;
-
-    ledarray[i * 3] = hue8 / 128;
-    ledarray[i * 3 + 2] = bri8;
-  }
+export function sliderStrandWidth(v) {
+  strandWidth = 0.05 + v
 }
 
 
-// Rendering Logic
-export function beforeRender(delta) {
-  colorwaves(delta);
+export function sliderFrequency(v) {
+  freq = .1 + (v * 18) 
 }
 
-export function render(index) {
-  var h = ledarray[index * 3];
-  var v = ledarray[index * 3 + 2];
+// Sliders and Inputs
+export function sliderPalette(v) {
+  paletteIndex = floor(v * (palettes.length - 1));
+  setPalette(palettes[paletteIndex]); 
+}
+
+export function sliderMode(v) {
+  myMode = ceil((v * 2))
+}
+export function sliderDistance(v) {
+  distance = v
+}
+
+function beforeSinushimmer(delta) {
+  t = time(speed / (65.536))
+}
+
+function sinushimmer(index, r, phi, theta) {
   
+  if (myMode === 0) {
+    //frequencyModifier = wave(t*3)
+    frequencyModifier = bezierQuadratic(t, 0, 18, 0)
+    
+  } else if (myMode === 1) {
+    frequencyModifier = 0.2 + wave(t) 
+  } else if (myMode === 2) {
+    count = wave(t)
+    frequencyModifier = count + freq
+  }
+   
+
   paletteIndex = time(secondsPerPalette / 65.536 * palettes.length) * palettes.length;
 
   bri = 1
@@ -135,34 +86,88 @@ export function render(index) {
     }
   }
 
+  setPalette(palettes[floor(paletteIndex)])
 
-  fastLedPaletteAt(h, palettes[paletteIndex], v * v);
+
+  
+  line = near(r, 
+    0.5 + distance * cos((frequencyModifier*phi - t) * (PI2))
+  , strandWidth)
+  
+  paint(line, 1)
 }
 
-// Utility Functions
-function LERP(percent, low, high) {
-  return low + percent * (high - low);
+
+export function beforeRender(delta) {
+  beforeSinushimmer(delta)
 }
 
-function fastLedPaletteAt(v, palette, brightness) {
-  var paletteSize, scale, entryOffset, previousEntryOffset;
-  paletteSize = floor(palette.length / 4);
-  v = mod(v, 1);
-  for (entryOffset = 0; entryOffset < palette.length; entryOffset += 4) {
-    if (v <= palette[entryOffset]) {
-      if (v == 0) {
-        rgb(palette[entryOffset + 1], palette[entryOffset + 2], palette[entryOffset + 3]);
-      } else {
-        previousEntryOffset = entryOffset - 4;
-        scale = (v - palette[previousEntryOffset]) / (palette[entryOffset] - palette[previousEntryOffset]);
-        rgb((LERP(scale, palette[previousEntryOffset + 1], palette[entryOffset + 1])) * brightness,
-            (LERP(scale, palette[previousEntryOffset + 2], palette[entryOffset + 2])) * brightness,
-            (LERP(scale, palette[previousEntryOffset + 3], palette[entryOffset + 3])) * brightness);
-      }
-      break;
-    }
-  }
+export function render3D(index, r, phi, theta) {
+  sinushimmer(index, r, phi, theta)
 }
+  
+export function render2D(index, r, phi) {
+  render3D(index, r, phi, .5) // Equatorial section
+}
+
+export function render(index) {
+  render2D(index, index / pixelCount, 0)
+}
+
+// Utilities
+
+// Several modes define a line in space. This sets the defualt thickness of
+// those. Use a higher percentage for projects with fewer pixels.
+var halfwidthDefault = 0.125
+
+// Returns 1 when a & b are proximate, 0 when they are more than `halfwidth`
+// apart, and a gamma-corrected brightness for distances within `halfwidth`
+function near(a, b, halfwidth) {
+  if (halfwidth == 0) halfwidth = halfwidthDefault
+  var v = clamp(1 - abs(a - b) / halfwidth, 0, 1)
+  return v * v
+}
+
+// put these lines near the top, outside of function declarations
+var viridis = [ 0.0, 68/255, 1/255, 84/255, 0.1, 72/255, 36/255, 117/255, 0.2, 65/255, 68/255, 135/255, 0.3, 53/255, 95/255, 141/255, 0.4, 42/255, 120/255, 142/255, 0.5, 33/255, 145/255, 140/255, 0.6, 34/255, 168/255, 132/255, 0.7, 68/255, 191/255, 112/255, 0.8, 122/255, 209/255, 81/255, 0.9, 189/255, 223/255, 38/255, 1.0, 253/255, 231/255, 37/255,]
+var inferno = [ 0.0, 0/255, 0/255, 4/255, 0.1, 22/255, 11/255, 57/255, 0.2, 66/255, 10/255, 104/255, 0.3, 106/255, 23/255, 110/255, 0.4, 147/255, 38/255, 103/255, 0.5, 188/255, 55/255, 84/255, 0.6, 221/255, 81/255, 58/255, 0.7, 243/255, 120/255, 25/255, 0.8, 252/255, 165/255, 10/255, 0.9, 246/255, 215/255, 70/255, 1.0, 252/255, 255/255, 164/255, ]
+var magma   = [ 0.0, 0/255, 0/255, 4/25, 0.1, 20/255, 14/255, 54/255, 0.2, 59/255, 15/255, 112/255, 0.3, 100/255, 26/255, 128/255, 0.4, 140/255, 41/255, 129/255, 0.5, 183/255, 55/255, 121/255, 0.6, 222/255, 73/255, 104/255, 0.7, 247/255, 112/255, 92/255, 0.8, 254/255, 159/255, 109/255, 0.9, 254/255, 207/255, 146/255, 1.0, 252/255, 253/255, 191/255, ]
+var plasma  = [
+  0.0, 13/255, 8/255, 135/255,
+  0.1, 65/255, 4/255, 157/255,
+  0.2, 106/255, 0/255, 168/255,
+  0.3, 143/255, 13/255, 164/255,
+  0.4, 177/255, 42/255, 144/255,
+  0.5, 204/255, 71/255, 120/255,
+  0.6, 225/255, 100/255, 98/255,
+  0.7, 242/255, 132/255, 75/255,
+  0.8, 252/255, 166/255, 54/255,
+  0.9, 252/255, 206/255, 37/255,
+  1.0, 240/255, 249/255, 33/255,
+]
+
+// Gradient palette "lava_gp", originally from
+// http://soliton.vm.bytemark.co.uk/pub/cpt-city/neota/elem/tn/lava.png.index.html
+// converted for FastLED with gammas (2.6, 2.2, 2.5)
+// purple: 0.0, 68/255, 1/255, 84/255,
+// soft red: 0.18, 0.071, 0.0, 0.0,
+// bright red: 0.376, 0.443, 0.0, 0.0,
+// green: 0.424, 0.557, 0.012, 0.004,
+var lava = [
+  0.0, 68/255, 1/255, 84/255,  
+  0.18, 0.071, 0.0, 0.0,
+  0.376, 0.443, 0.0, 0.0,
+  0.424, 0.557, 0.012, 0.004,
+  0.467, 0.686, 0.067, 0.004,
+  0.573, 0.835, 0.173, 0.008,
+  0.682, 1.0, 0.322, 0.016,
+  0.737, 1.0, 0.451, 0.016,
+  0.792, 1.0, 0.612, 0.016,
+  0.855, 1.0, 0.796, 0.016,
+  0.918, 1.0, 1.0, 0.016,
+  0.957, 1.0, 1.0, 0.278,
+  1.0, 1.0, 1.0, 1.0,
+];
 
 
 // From ColorWavesWithPalettes by Mark Kriegsman: https://gist.github.com/kriegsman/8281905786e8b2632aeb
@@ -637,7 +642,3 @@ var palettes = [
   BlacK_Red_Magenta_Yellow,
   Blue_Cyan_Yellow,
 ];
-
-
-
-
