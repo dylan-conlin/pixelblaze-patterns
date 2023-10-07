@@ -53,7 +53,7 @@ export function render2D(index,x,y) {
   ix = tmp;
 
   c += 1/hypot(px/sin(t + ix)*contrast, py/cos(t + iy)*contrast)
-  
+
   // scale, gamma correct and draw!
   c = 1.65-sqrt(c/2);
   c = c * c * c * c;
