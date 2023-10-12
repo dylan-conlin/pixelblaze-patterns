@@ -21,7 +21,7 @@ export function beforeRender(delta) {
     both as the single output hue, as well as a basis for the function that 
     creates the rotating / bouncing pulse(s).
   */
-  t1 = time(.1)
+  t1 = time(10)
   
   a = sin(time(.10) * PI2)  // -1..1 sinusoid every 6.5 seconds
   b = sin(time(.05) * PI2)  // -1..1 sinusoid every 3.3 seconds
@@ -48,11 +48,11 @@ export function render3D(index, x, y, z) {
 
   // Aggressively thin the plane by making medium-low v very small, for wider 
   // dark regions
-  v = pow(v, 5)
+  v = pow(v, 3)
 
   // Make the highest brightness values (when v is greater than 0.8) white
   // instead of a saturated color
-  s = v < .8
+  s = v < .78
   
   hsv(t1, s, v)
 }

@@ -4,19 +4,19 @@ export var speed = 3;
 export var zoom = 0.17;
 export var transition = 0.10;
 export var secondsPerPalette = 10;
-export var zoomRange;
-export var zoomFrequency;
-export var hSpeed = 1; // Sidways scroll speed
-export var vWave = 1; // Amplitude of vertical bobbing
+export var hFactor = 2;
+export var waveSum
+export var wavePhase1;
+export var waveFrequency;
 
 // Internal state variables
 var paletteIndex;
 var totalFactor;
-var waveFrequency;
-var wavePhase1;
 var wavePhase2;
 var wavePhase3;
 var timeSegment;
+var lastPaletteIndex = -1;
+export var x
 
 var rangeSlider = function(v, minValue, maxValue, isFloored, isReversed) {
   var valueRange = maxValue - minValue;
@@ -29,24 +29,13 @@ var rangeSlider = function(v, minValue, maxValue, isFloored, isReversed) {
   }
   return scaledValue;
 };
-// The slider functions adjust hSpeed and vWave, names have to start with 'slider'
-export function slider_hSpeed(v){
-  hSpeed = v / 10; // Multiply by 10 to allow greater range of speed
+export function sliderHFactor(v) { 
+  hFactor = rangeSlider(v, 0.1, 20, false, false);
 }
-
-export function slider_vWave(v) {
-  vWave = v / 2; // Multiply by 2 to allow greater wave amplitude
-}
-export function sliderZoomRange(v) {
-  zoomRange = rangeSlider(v, 0.1, 0.9, false, false); // Adjust as per requirement
-}
-export function sliderZoomFrequency(v) {
-  zoomFrequency = rangeSlider(v, 1, 10, false, false); // Adjust as per requirement
-}
-export function sliderZoom(v) {
+export function sliderZoom(v) { 
   zoom = rangeSlider(v, 0.1, 0.8, false, false);
 }
-export function sliderSpeed(v) {
+export function sliderSpeed(v) { 
   speed = rangeSlider(v, 3, 5, false, true);
 }
 export function sliderTransitionTime(v) {
@@ -74,36 +63,41 @@ function handlePaletteTransitions() {
     }
   }
 
-  setPalette(palettes[floor(paletteIndex)]);
+  // Only set the palette if the floor index has changed
+  var floorPaletteIndex = floor(paletteIndex);
+  if (floorPaletteIndex != lastPaletteIndex) {
+    setPalette(palettes[floorPaletteIndex]);
+    lastPaletteIndex = floorPaletteIndex;
+  }
 }
-
-
 
 // This function gets called once every frame and is responsible for preparing the state for the render functions
 export function beforeRender(delta) {
-  totalFactor = speed;
-  waveFrequency = wave(time(totalFactor * zoomFrequency / 65.536)) * zoomRange + 2;
-  wavePhase1 = wave(time(totalFactor * 9.8 / 65.536)) * PI2; // Using PI2 for full circle phases
-  wavePhase2 = wave(time(totalFactor * 12.5 / 65.536)) * PI2; // Using PI2 for full circle phases
-  wavePhase3 = wave(time(totalFactor * 9.8 / 65.536));
-  timeSegment = time(totalFactor * 0.66 / 65.536);
+  waveFrequency = wave(time(speed * 6.6 / 65.536)) * 5 + 2 
+  wavePhase1 = wave(time(speed * 9.8 / 65.536))
+  wavePhase2 = wave(time(speed * 12.5 / 65.536)) * PI2
+  wavePhase3 = wave(time(speed * 9.8 / 65.536));
+  timeSegment = time(speed * 0.66 / 65.536);
 }
-
-
 
 // This function is responsible for rendering 3D patterns
 export function render3D(index, x, y, z) {
   handlePaletteTransitions();
 
-  x = (x / zoom) + time(totalFactor / hSpeed); // Adjust scrolling speed
-  y = (y / zoom) + vWave / sin(time(totalFactor)); // Adjust vertical wave amplitude
+  // // Pattern code:
+  x /= zoom
+  y /= zoom
 
-  var waveSum = (1 + sin(x / waveFrequency + wavePhase1) + cos(y / waveFrequency + wavePhase2)) * .5;
-  var v = wave(waveSum + timeSegment);
-  v = v / v / v; // More drastic brightness contrast
-  var h = triangle(waveSum) / 2 + wavePhase3;
+  // Modify line responsible for left-right scrolling
+  var waveX = x*2 + time(speed * 9.8 / 65.536); // linear transformation 
+  var waveX = sin(x * waveFrequency + wavePhase1); // store these expensive operations in variables
+  var waveY = cos(y * waveFrequency + wavePhase2);
+  waveSum = (1 + waveX + waveY) * .5;
+  var timeSegmentWave = wave(waveSum + timeSegment); // store wave operation in a variable
 
-  paint(h, waveSum, v);
+  v = timeSegmentWave * timeSegmentWave * timeSegmentWave; // More drastic brightness contrast
+  h = triangle(waveSum) / 2 + wavePhase3;
+  paint(h, 1, v);
 }
 
 export function render2D(index, r, phi) {
