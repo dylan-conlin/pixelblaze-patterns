@@ -16,8 +16,8 @@ function signum(a) {
   return (a > 0) - (a < 0)
 }
 
-export var speed = 5;
 var timebase;
+export var speed = 5;
 
 export function sliderSpeed(v) {
   speed = 1+9* v;
