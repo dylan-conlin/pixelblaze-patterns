@@ -11,10 +11,8 @@ The fourth uses a fractal turbulence function, and looks like a blackened rollin
 var rgbGradient = [
   0,    0, 0, 0,
   0.2,  1, 0, 0,
-  // 0.8,  1, 1, 0,
-  // 1,    1, 1, 1
- 0.8,  1, 0.5, 0, // Orange-ish instead of yellow
-  1,    1, 0.8, 0.8 // Light red instead of white
+  0.8,  1, 1, 0,
+  1,    1, 1, 1
 ]
 setPalette(rgbGradient)
 
@@ -25,12 +23,7 @@ modes = [
   (x,y,z) => (perlinFbm(x, y, z, 2, .5, 3)+1)/2, //this can also generate negative values
   (x,y,z) => perlinTurbulence(x, y, z, 2, .5, 3),
 ]
-export var fireHeight = 1.0;
 export var mode = 1, fireScale = 3, risingSpeed = 1, morphSpeed = 1
-export function sliderFireHeight(v) {
-  fireHeight = v * 2; // Scale according to your preference, here 0-2 range
-}
-
 export function sliderMode(v) {
   mode = round(v*(modes.length - 1))
 }
@@ -61,16 +54,19 @@ export function beforeRender(delta) {
   translate(-.5, 0)
   scale(fireScale,fireScale)
 }
-
+// You can also project up a dimension. Think of this as mixing in the z value
+// to x and y in order to compose a stack of matrices.
+export function render3D(index, x, y, z) {
+  x1 = (x - cos(z / 4 * PI2)) / 2
+  y1 = (y - sin(z / 4 * PI2)) / 2
+  render2D(index, x1, y1)
+}
 export function render2D(index, x, y) {
   //call out to a noise function based on the mode, animating y to rise and using z to morph the fire over time
-  v = modeFn(x, y + yTime, morphTime )
-
-  // Adjust the intensity based on the fireHeight slider
-  v *= fireHeight; // Adjusts the visibility threshold
-
+  v = modeFn(x, y + yTime, morphTime ) 
+  
   //create a hotter column around the center of x, fading towards the edges
-  v = v * 2*(1 - abs(x/fireScale*1.8))
+  v = v * 2*(1 - abs(x/fireScale*1.8)) 
   
   //fade out the higher it gets
   v = v * y/fireScale 

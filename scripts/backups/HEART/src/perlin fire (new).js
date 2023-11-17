@@ -11,11 +11,12 @@ The fourth uses a fractal turbulence function, and looks like a blackened rollin
 var rgbGradient = [
   0,    0, 0, 0,
   0.2,  1, 0, 0,
-  // 0.8,  1, 1, 0,
-  // 1,    1, 1, 1
- 0.8,  1, 0.5, 0, // Orange-ish instead of yellow
-  1,    1, 0.8, 0.8 // Light red instead of white
+ // 0.8,  1, 1, 0,
+//  1,    1, 1, 1
+  0.8,  1, 0.5, 0, // Orange-ish instead of yellow
+   1,    1, 0.8, 0.8 // Light red instead of white
 ]
+
 setPalette(rgbGradient)
 
 //variants of noise can be chosen from
@@ -27,8 +28,24 @@ modes = [
 ]
 export var fireHeight = 1.0;
 export var mode = 1, fireScale = 3, risingSpeed = 1, morphSpeed = 1
+export var xOffset = 0.0;
+export var yOffset = 0.0;
+export var zOffset = 0.0;
+
+export function sliderXOffset(v) {
+  xOffset = v * 2 - 1; // Adjust the range as needed
+}
+
+export function sliderYOffset(v) {
+  yOffset = v * 2 - 1; // Adjust the range as needed
+}
+
+export function sliderZOffset(v) {
+  zOffset = v * 2 - 1; // Adjust the range as needed
+}
+
 export function sliderFireHeight(v) {
-  fireHeight = v * 2; // Scale according to your preference, here 0-2 range
+  fireHeight = v * 3; // Scale according to your preference, here 0-2 range
 }
 
 export function sliderMode(v) {
@@ -63,6 +80,10 @@ export function beforeRender(delta) {
 }
 
 export function render2D(index, x, y) {
+  // Apply offsets to x and y
+  x += xOffset;
+  y += yOffset;
+
   //call out to a noise function based on the mode, animating y to rise and using z to morph the fire over time
   v = modeFn(x, y + yTime, morphTime )
 
@@ -70,7 +91,7 @@ export function render2D(index, x, y) {
   v *= fireHeight; // Adjusts the visibility threshold
 
   //create a hotter column around the center of x, fading towards the edges
-  v = v * 2*(1 - abs(x/fireScale*1.8))
+  v = v * 2*(1 - abs(x/fireScale*1.8)) 
   
   //fade out the higher it gets
   v = v * y/fireScale 
@@ -78,4 +99,17 @@ export function render2D(index, x, y) {
   //keep palette from wrapping if noise goes past 1.0
   v = min(v,1) 
   paint(v, v)
+}
+
+// You can also project up a dimension. Think of this as mixing in the z value
+// to x and y in order to compose a stack of matrices.
+export function render3D(index, x, y, z) {
+  // Apply offsets to x, y, and z
+  x += xOffset;
+  y += yOffset;
+  z += zOffset;
+
+  x1 = (x - cos(z / 4 * PI2)) / 2
+  y1 = (y - sin(z / 4 * PI2)) / 2
+  render2D(index, x1, y1)
 }
