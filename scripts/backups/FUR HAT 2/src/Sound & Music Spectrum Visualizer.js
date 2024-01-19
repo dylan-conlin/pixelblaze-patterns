@@ -9,9 +9,9 @@
   
 /* -----------------------------------------Variables------------------------------------------ */
   
-  var sections = 12   // Total number of sections to split the strip into (recommended range: 6-12)
+  var sections = 8   // Total number of sections to split the strip into (recommended range: 6-12)
   var sectPixels = pixelCount / sections  // Number of pixels in each section
-  var refreshRate = 10  // How often to refresh the sound frequency data (higher values produce less flicker)
+  var refreshRate = 180  // How often to refresh the sound frequency data (higher values produce less flicker)
   var targetMax = .2    // Percentage of the strip the sensitivity will try to have lit up simultaneously
   
   export var bassAdjust = 0.05 // EQ multiplier for low/bass frequencies

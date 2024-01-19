@@ -70,22 +70,17 @@ def pbbTool():
                 print(f'  {patternName[1]}')
 
     def extractFromPBB(pbbFile, patternName, outputDir):
-        print(f"Extracting patterns matching '{patternName} from '{pbbFile}':")
-        # Read a Pixelblaze Binary Backup (PBB) from {fileName} and write only the patterns to the Pixelblaze at {ipAddress}.
+        print(f"Extracting patterns matching '{patternName}' from '{pbbFile}':")
         pbb = PBB.fromFile(pbbFile)
-        # Go through the list of patterns stored in the Pixelblaze Binary Backup...
         for fileName in pbb.getFileList(PBB.fileTypes.filePattern):
-            # ...convert them into Pixeblaze Binary Pattern objects...
             pbp = PBP.fromBytes(pathlib.Path(fileName).stem, pbb.getFile(fileName))
             if fnmatch.fnmatch(pbp.name, patternName):
-                # ...and export any with matching patternNames as files.
                 print(f'  {pbp.name}')
-                if outputDir:
-                    # if outputDir is specified, write the file there.
-                    # Otherwise, write it in the current directory.
-                    pbp.toEPE().toFile(pathlib.Path(outputDir).joinpath(pbp.name).with_suffix('.epe'))
-                else:
-                    pbp.toEPE().toFile(pathlib.Path(pbbFile).with_name(pbp.name).with_suffix('.epe'))
+                # Sanitize the pattern name by replacing forward slashes
+                sanitized_name = pbp.name.replace('/', '⁄')  # Replace forward slash with fraction slash
+                epe_file = pathlib.Path(outputDir).joinpath(sanitized_name).with_suffix('.epe')
+                pbp.toEPE().toFile(epe_file)
+
 
     def listPixelblazes(args):
         for ipAddress in Pixelblaze.EnumerateAddresses(timeout=1500):
