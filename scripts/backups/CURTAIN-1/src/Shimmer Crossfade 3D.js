@@ -52,7 +52,6 @@ export function render2D(i, x, y) {
     is probabilistically related to the percentage we're into this crossfade.
   */
   skew = random(1) < wave((pctIntoXfFade - 0.5) / 2) // wave makes it "tween"
-
   thisPixelMode = floor((modeTime + skew) % modeCount)
   renderers[thisPixelMode](i, x, y)
 }
