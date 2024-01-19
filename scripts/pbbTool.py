@@ -77,7 +77,7 @@ def pbbTool():
             if fnmatch.fnmatch(pbp.name, patternName):
                 print(f'  {pbp.name}')
                 # Sanitize the pattern name by replacing forward slashes
-                sanitized_name = pbp.name.replace('/', '⁄')  # Replace forward slash with fraction slash
+                sanitized_name = pbp.name.replace('/', '&')  # Replace forward slash with fraction slash
                 epe_file = pathlib.Path(outputDir).joinpath(sanitized_name).with_suffix('.epe')
                 pbp.toEPE().toFile(epe_file)
 
