@@ -13,15 +13,18 @@ backup_and_extract() {
     mkdir -p "${pixelblaze_dir}/epe"
     mkdir -p "${pixelblaze_dir}/src"
 
-    # Backup the Pixelblaze
+    # Attempt to backup the Pixelblaze
     local backup_filename="${pixelblaze_dir}/${device_name}.pbb"
-    ./pbbTool.py backup --ipAddress="${ip_address}" --pbbFile="${backup_filename}"
+    if ./pbbTool.py backup --ipAddress="${ip_address}" --pbbFile="${backup_filename}"; then
+        # Extract .epe files from the backup
+        ./pbbTool.py extract --pbbFile="${backup_filename}" --patternName=* --outputDir="${pixelblaze_dir}/epe"
 
-    # Extract .epe files from the backup
-    ./pbbTool.py extract --pbbFile="${backup_filename}" --patternName=* --outputDir="${pixelblaze_dir}/epe"
-
-    # Extract .js files from the .epe files
-    python3 ./extract_src.py "${pixelblaze_dir}/epe" "${pixelblaze_dir}/src"
+        # Extract .js files from the .epe files
+        python3 ./extract_src.py "${pixelblaze_dir}/epe" "${pixelblaze_dir}/src"
+    else
+        echo "Error: Failed to backup Pixelblaze at ${ip_address}."
+        echo "Please check your network connection, ensure the Pixelblaze is accessible at ${ip_address}, and verify that there are no firewall restrictions."
+    fi
 }
 
 # Iterate over all Pixelblazes and perform backup and extraction
